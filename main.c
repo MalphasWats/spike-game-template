@@ -9,40 +9,10 @@ int main (void)
 {    
     initialise();
         
-    // Display Logo
-    // 52 * 128
-    for(word pixel=0 ; pixel < 52*128 ; pixel++)
-    {
-        shift_out_byte(PALETTE[12]);
-        shift_out_byte(PALETTE[12]>>8);
-    }
-    
-    // 16 + logo + 16
-    for(byte row=0 ; row<24 ; row++)
-    {
-        for(byte i=0 ; i<16 ; i++)
-        {
-            shift_out_byte(PALETTE[12]);
-            shift_out_byte(PALETTE[12]>>8);
-        }
-        for(byte pixel=0 ; pixel<96 ; pixel++)
-        {
-            shift_out_byte(PALETTE[LOGO[row*96+pixel]]);
-            shift_out_byte(PALETTE[LOGO[row*96+pixel]]>>8);
-        }
-        for(byte i=0 ; i<16 ; i++)
-        {
-            shift_out_byte(PALETTE[12]);
-            shift_out_byte(PALETTE[12]>>8);
-        }
-    }
-    
-    // 52 * 128
-    for(word pixel=0 ; pixel < 52*128 ; pixel++)
-    {
-        shift_out_byte(PALETTE[12]);
-        shift_out_byte(PALETTE[12]>>8);
-    }
+    // display logo
+    for(byte y=0 ; y<LOGO_HEIGHT ; y++)
+        for(byte x=0 ; x<LOGO_WIDTH ; x++)
+            buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO[y*LOGO_WIDTH + x];
     
     delay_ms(SPLASH_DELAY);
     

@@ -4,7 +4,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-word _millis = 0;
+volatile word _millis = 0;
 
 word rngSEED = 5;
 word rng( void )
@@ -15,50 +15,74 @@ word rng( void )
 
 void delay_ms( word ms )
 {
-   for (word i=0; i < ms; i++)
-   {
-      _delay_ms(1);
-   }
+    for (word i=0; i < ms; i++)
+    {
+        _delay_ms(1);
+    }
 }
 
 void delay_us( word us )
 {
-   for (word i=0; i < us; i++)
-   {
-      _delay_us(1);
-   }
+    for (word i=0; i < us; i++)
+    {
+        _delay_us(1);
+    }
 }
 
 void initialise( void )
 {
     /* Configure Outputs */
     //DDRA
-    DDRB = (1<<CS) | (1<<DC) | (1<<RST) | (1<<SCK) | (1<<MOSI);
+    DDRB = (1<<CS) | (1<<DC) | (1<<RST) | (1<<SCK);
     
-    // (0<<UP) | (0<<DOWN) | (0<<LEFT) | (0<<RIGHT) | (0<<BTN_A) | (0<<BTN_B) | (0<<BTN_C); // INPUTS!
-    DDRC = 128; // PC7 Unused, set as output.
+    PORTC = 0xFF; // Set pull-up resistors
     
-    DDRD = (1 << SND);
+    DDRD = (1 << SND) | (1<<MOSI);
     
-    /* Initialise Timer */
+    /* Initialise "millis" Timer */
     TCCR0A = 0x02;          // OC0A disconnected, CTC Mode.
     TCCR0B = 0x03;          // 1/64 CLK Prescale.
     
-    TIMSK0 |= 0x02;         // Enable OCIEA Compare Interrupt
+                 //                     F_CPU   Prescale  Timer frequency (1 ms)
+    OCR0A = 125; // Set compare value (8000000Hz / 64) / 1000Hz
+    //OCR0A = 250; // Set compare value (16000000Hz / 64) / 1000Hz
+    
+    TIMSK0 |= 0x02;         // Enable OCR0A Compare Interrupt
+    
+    
+    /* Initialise "draw" Timer */
+    TCCR2A = 0x02;          // OC2A disconnected, CTC Mode.
+    TCCR2B = 0x07;          // 1/1024 CLK Prescale.
+    
+                 //                     F_CPU   Prescale   Timer frequency (1 ms)
+    //OCR2A = 231; // Set compare value ((8000000Hz / 1024) / 1000Hz) * 33  // 30fps
+    // TODO: Need to time interrupt duration and tweak this number
+    // TODO: for now just fudge it a bit
+    OCR2A = 210; // ~3 ms to push out the screen data, probably actually faster than that though.
     
     sei();                  // Enable interrupts
     
-                 //                     F_CPU   Prescale  Timer frequency (1 ms)
-    OCR0A = 250; // Set compare value (16000000Hz / 64) / 1000Hz
-    
     /* Setup Display */
     initialise_oled();
+    
+    // Need to do this AFTER display initialisation otherwise
+    // The interrupt will fire and write garbage into command registers!
+    TIMSK2 = 0x02;          // Enable OCR2A Interrupt
+    
     clear_display();
 }
 
 ISR(TIMER0_COMPA_vect)
 {
     _millis += 1;
+}
+
+ISR(TIMER2_COMPA_vect)
+{
+    for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
+    {
+        shift_out_byte(buffer[i]);
+    }
 }
 
 word millis( void )
@@ -68,15 +92,16 @@ word millis( void )
 
 /* OLED Functions */
 
+// TODO: this should use HW SPI (pins configured for USART SPI)
 void shift_out_byte(byte b)
 {
     if ( b & (1 << 7) )
     {
-        PORTB |= 1 << MOSI;
+        PORTD |= 1 << MOSI;
     }
     else
     {
-        PORTB &= ~(1 << MOSI);
+        PORTD &= ~(1 << MOSI);
     }
     
     PORTB |= 1 << SCK;      // HIGH
@@ -84,11 +109,11 @@ void shift_out_byte(byte b)
     
     if ( b & (1 << 6) )
     {
-        PORTB |= 1 << MOSI;
+        PORTD |= 1 << MOSI;
     }
     else
     {
-        PORTB &= ~(1 << MOSI);
+        PORTD &= ~(1 << MOSI);
     }
     
     PORTB |= 1 << SCK;      // HIGH
@@ -96,11 +121,11 @@ void shift_out_byte(byte b)
     
     if ( b & (1 << 5) )
     {
-        PORTB |= 1 << MOSI;
+        PORTD |= 1 << MOSI;
     }
     else
     {
-        PORTB &= ~(1 << MOSI);
+        PORTD &= ~(1 << MOSI);
     }
     
     PORTB |= 1 << SCK;      // HIGH
@@ -108,11 +133,11 @@ void shift_out_byte(byte b)
     
     if ( b & (1 << 4) )
     {
-        PORTB |= 1 << MOSI;
+        PORTD |= 1 << MOSI;
     }
     else
     {
-        PORTB &= ~(1 << MOSI);
+        PORTD &= ~(1 << MOSI);
     }
     
     PORTB |= 1 << SCK;      // HIGH
@@ -120,11 +145,11 @@ void shift_out_byte(byte b)
     
     if ( b & (1 << 3) )
     {
-        PORTB |= 1 << MOSI;
+        PORTD |= 1 << MOSI;
     }
     else
     {
-        PORTB &= ~(1 << MOSI);
+        PORTD &= ~(1 << MOSI);
     }
     
     PORTB |= 1 << SCK;      // HIGH
@@ -132,11 +157,11 @@ void shift_out_byte(byte b)
     
     if ( b & (1 << 2) )
     {
-        PORTB |= 1 << MOSI;
+        PORTD |= 1 << MOSI;
     }
     else
     {
-        PORTB &= ~(1 << MOSI);
+        PORTD &= ~(1 << MOSI);
     }
     
     PORTB |= 1 << SCK;      // HIGH
@@ -144,11 +169,11 @@ void shift_out_byte(byte b)
     
     if ( b & (1 << 1) )
     {
-        PORTB |= 1 << MOSI;
+        PORTD |= 1 << MOSI;
     }
     else
     {
-        PORTB &= ~(1 << MOSI);
+        PORTD &= ~(1 << MOSI);
     }
     
     PORTB |= 1 << SCK;      // HIGH
@@ -156,148 +181,102 @@ void shift_out_byte(byte b)
     
     if ( b & (1 << 0) )
     {
-        PORTB |= 1 << MOSI;
+        PORTD |= 1 << MOSI;
     }
     else
     {
-        PORTB &= ~(1 << MOSI);
+        PORTD &= ~(1 << MOSI);
     }
     
     PORTB |= 1 << SCK;      // HIGH
     PORTB &= ~(1 << SCK);   // LOW
 }
 
+/* Initiasation for SSD1306 OLED Controller */
 void initialise_oled(void)
 {
-    // SET CS LOW
-    PORTB &= ~(1 << CS);        // LOW (Enabled)
+    PORTB &= ~(1 << DC);                // LOW (Command Mode)
     
-    // TOGGLE RESET high/low/high
     PORTB |= 1 << RST;          // HIGH
-    delay_ms(200);
+    delay_ms(10);
     PORTB &= ~(1 << RST);       // LOW
-    delay_ms(200);
+    delay_ms(10);
     PORTB |= 1 << RST;          // HIGH
-    delay_ms(200);
+    delay_ms(10);
     
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xFD);       // Command Lock
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x12);  
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xFD);       // Command Lock
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0xB1);
+    shift_out_byte(0xAE);               // DISPLAYOFF
     
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xA4);       // Display ALL OFF
+    shift_out_byte(0xD5);               // SETDISPLAYCLOCKDIV
+    shift_out_byte(0x80);               // the suggested ratio 0x80
 
-    shift_out_byte(0xB3);       // Clock Div
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0xF1);  		// 7:4 = Oscillator Frequency, 3:0 = CLK Div Ratio (A[3:0]+1 = 1..16)
-    
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xCA);       // MUX Ratio
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(127);
-    
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xA0);       // SET Remap    //TODO: Need to upsidedown
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x74);       // 0111 0100
-    
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0x15);       // SET Column
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x00);
-    shift_out_byte(0x7F);
-    
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0x75);       // SET Row
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x00);
-    shift_out_byte(0x7F);
+    shift_out_byte(0xA8 );              // SSD1306_SETMULTIPLEX
+    shift_out_byte(SCREEN_HEIGHT - 1);
 
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xA1);       // Startline
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x00);
+    shift_out_byte(0xD3 );              // SETDISPLAYOFFSET
+    shift_out_byte(0x0);                // no offset
+    shift_out_byte(0x40  | 0x0);        // SETSTARTLINE line #0
+  
+    shift_out_byte(0x8D);               // CHARGEPUMP
+    shift_out_byte(0x14);               // Not External Vcc
+  
+    shift_out_byte(0x20 );              // MEMORYMODE
+    shift_out_byte(0x00);               // 0x0 act like ks0108
+    shift_out_byte(0xA0  | 0x1);        // SEGREMAP
+    shift_out_byte(0xC8 );              // COMSCANDEC
 
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xA2);       // Display Offset
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x00);
 
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xB5);       // SET GPIO
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x00);
-    
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xAB);       // Function Select
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x01);       // internal (diode drop)
+    shift_out_byte(0xDA);               // SETCOMPINS
+    shift_out_byte(0x12);
+  
+    shift_out_byte(0x81 );              // SETCONTRAST
+    shift_out_byte(0xCF);               // Not External Vcc
 
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xB1);       // Precharge
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x32);
- 
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xBE);       // VCOMH
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x05);
+
+    shift_out_byte(0xD9 );              // SETPRECHARGE
+    shift_out_byte(0xF1);               // Not External Vcc
+  
+    shift_out_byte(0xDB);               // SETVCOMDETECT
+    shift_out_byte(0x40);
+  
+    shift_out_byte(0xA4 );              // DISPLAYALLON_RESUME
+    shift_out_byte(0xA6 );              // NORMALDISPLAY
+
+    //shift_out_byte(0x2E );            // DEACTIVATE_SCROLL
+
+    shift_out_byte(0xAF);               // DISPLAYON
     
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xC1);       // Contrast ABC
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0xC8);
-    shift_out_byte(0x80);
-    shift_out_byte(0xC8);
+    shift_out_byte(0xB0 + 0);           // PAGEADDR (0 = reset)
+    shift_out_byte(0 & 0x0F);           // Column start address (0 = reset)
+    shift_out_byte(0x10 | (0 >> 4));    // LOW COL ADDR
     
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xC7);       // Contrast Master
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x0F);
-    
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xB4);       // SET VSL
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0xA0);
-    shift_out_byte(0xB5);
-    shift_out_byte(0x55);
-    
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xB6);       // Precharge
-    PORTB |= 1 << DC;           // HIGH (DATA)
-    shift_out_byte(0x01);
-    
-    //PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    //shift_out_byte(0xA5);       // Display ALL On
-    
-    PORTB &= ~(1 << DC);        // LOW (COMMAND)
-    shift_out_byte(0xA6);       // Normal Display (not inverted)
-    
-    shift_out_byte(0x5C);       // Write RAM
-    
-    PORTB |= 1 << DC;           // DATA
+    PORTB |= 1 << DC;                   // DATA
 }
 
 void clear_display(void)
 {
-    for (word pixel=0 ; pixel<SCREEN_HEIGHT*SCREEN_WIDTH ; pixel++)
+    for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
     {
-        shift_out_byte(0x00);
-        shift_out_byte(0x00);
+        buffer[i] = 0x00;
+        //shift_out_byte(0x00);
     }
 }
 
+void pause_drawing(void)
+{
+    TIMSK2 = 0x00;
+}
+
+void resume_drawing(void)
+{
+    TIMSK2 = 0x02;
+}
+
+
 void display_off(void)
 {
+    pause_drawing();
     PORTB &= ~(1 << DC);        // COMMAND
-    shift_out_byte(0xAE);       // DISPLAYOFF (Sleep)
-    
-    shift_out_byte(0x5C);       // Write RAM
+    shift_out_byte(0xAE);       // DISPLAYOFF
     
     PORTB |= 1 << DC;           // DATA
 }
@@ -305,12 +284,21 @@ void display_off(void)
 void display_on(void)
 {
     PORTB &= ~(1 << DC);        // COMMAND
-    shift_out_byte(0xAF);       // DISPLAYON (Wake)
-    
-    shift_out_byte(0x5C);       // Write RAM
+    shift_out_byte(0xAF);       // DISPLAYON
     
     PORTB |= 1 << DC;           // DATA
+    resume_drawing();
 }
+
+void display_image(const byte __memx *image, byte x, byte y, byte width, byte height)
+{
+    // TODO: Needs to handle coords not on grid
+    height >>= 3;
+    y >>= 3;
+    
+    
+}
+
 
 /* Sound Functions */
 
