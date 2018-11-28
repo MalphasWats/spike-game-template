@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from PIL import Image
+import os
 
 parser = ArgumentParser()
 
@@ -12,11 +13,15 @@ parser.add_argument('-o',
                     default='i',
                     help='output as 8x8 tiles(=t) or raw image(=i) (default)')
                     
-parser.add_argument('-f', dest='output_filename', default='image.txt', help='output filename')
+parser.add_argument('-f', dest='output_filename', help='output filename')
 
 args = parser.parse_args()
 
-im = Image.open(args.input_image)
+try:
+    im = Image.open(args.input_image)
+except (FileNotFoundError):
+    print("File {} not found.".format(args.input_image))
+    exit(1)
 pixels = list(im.getdata())
 
 width = im.size[0]
@@ -37,8 +42,12 @@ for y in range(height // 8):
             if pixel == (0, 0, 0) or pixel == (0, 0, 0, 255):
                 b = b | (1 << i)
         image.append(b)
+        
+output_filename = args.output_filename
+if not output_filename:
+    output_filename = os.path.splitext(os.path.split(args.input_image)[1])[0] + '.txt'
 
-f = open(args.output_filename, 'w')
+f = open(output_filename, 'w')
 
 if args.output_format == 't': 
     while(len(image) > 0):
