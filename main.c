@@ -22,7 +22,7 @@ int main (void)
         
         if (btn_timer == 0)
         {
-            if (PINC > 0)
+            if (~PINC > 0)
             {
                 click();
                 btn_timer = t+BTN_DELAY;
