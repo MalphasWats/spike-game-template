@@ -13,6 +13,12 @@ parser.add_argument('-o',
                     default='i',
                     help='output as 8x8 tiles(=t) or raw image(=i) (default)')
                     
+parser.add_argument('--inverted', '--inv',
+                    dest='inverted',
+                    action='store_true',
+                    default=False,
+                    help='input image should be treated as inverse b/w')
+                    
 parser.add_argument('-f', dest='output_filename', help='output filename')
 
 args = parser.parse_args()
@@ -39,8 +45,12 @@ for y in range(height // 8):
         b = 0
         for i in range(8):
             pixel = pixels[((y*8)+i) * width + x]
-            if pixel == (0, 0, 0) or pixel == (0, 0, 0, 255):
-                b = b | (1 << i)
+            if args.inverted:
+                if pixel == (255, 255, 255) or pixel == (255, 255, 255, 255):
+                    b = b | (1 << i)
+            else:
+                if pixel == (0, 0, 0) or pixel == (0, 0, 0, 255):
+                    b = b | (1 << i)
         image.append(b)
         
 output_filename = args.output_filename
