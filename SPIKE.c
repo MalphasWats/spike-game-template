@@ -271,7 +271,6 @@ void resume_drawing(void)
     TIMSK2 = 0x02;
 }
 
-
 void display_off(void)
 {
     pause_drawing();
@@ -289,16 +288,6 @@ void display_on(void)
     PORTB |= 1 << DC;           // DATA
     resume_drawing();
 }
-
-void display_image(const byte __memx *image, byte x, byte y, byte width, byte height)
-{
-    // TODO: Needs to handle coords not on grid
-    height >>= 3;
-    y >>= 3;
-    
-    
-}
-
 
 /* Sound Functions */
 
