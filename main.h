@@ -10,8 +10,8 @@ typedef struct map {
 } map;
 
 typedef struct sprite {
-    word x;
-    word y;
+    int x;
+    int y;
     word frame;
     
     word frame_duration;

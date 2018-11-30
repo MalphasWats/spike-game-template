@@ -86,15 +86,27 @@ int main (void)
         if (btn_timer == 0)
         {
             buttons = ~PINC;
-            if (buttons & B_A)
+            if (buttons & B_LEFT)
             {
                 click();
                 btn_timer = t+BTN_DELAY;
+                player.x -= 1;
+            }
+            if (buttons & B_RIGHT)
+            {
+                click();
+                btn_timer = t+BTN_DELAY;
+                player.x += 1;
             }
         }
         
         if (t >= btn_timer)
             btn_timer = 0;
+        
+        if (player.x < 0)
+            player.x = 0;
+        if (player.x > 128-8)
+            player.x = 128-8;
         
         draw_map(&level_1, 0, 0);
         
