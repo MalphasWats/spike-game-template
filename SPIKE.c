@@ -195,6 +195,7 @@ void shift_out_byte(byte b)
 /* Initiasation for SSD1306 OLED Controller */
 void initialise_oled(void)
 {
+    PORTB &= ~(1 << CS);                // LOW (Enabled)
     PORTB &= ~(1 << DC);                // LOW (Command Mode)
     
     PORTB |= 1 << RST;          // HIGH
@@ -257,7 +258,6 @@ void clear_display(void)
     for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
     {
         buffer[i] = 0x00;
-        //shift_out_byte(0x00);
     }
 }
 

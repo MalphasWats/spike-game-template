@@ -24,13 +24,22 @@
 #define MOSI    1
 
 /* Button Pins (PORTC) */
-#define UP     6
-#define DOWN   5
-#define LEFT   4
-#define RIGHT  3
-#define BTN_A      2
-#define BTN_B      1
-#define BTN_C      0
+#define UP          6
+#define DOWN        5
+#define LEFT        4
+#define RIGHT       3
+#define BTN_A       2
+#define BTN_B       1
+#define BTN_C       0
+
+/* Button Masks */
+#define B_UP        0b01000000
+#define B_DOWN      0b00100000
+#define B_LEFT      0b00010000
+#define B_RIGHT     0b00001000
+#define B_A         0b00000100
+#define B_B         0b00000010
+#define B_C         0b00000001
 
 #define BTN_DELAY       180
 
