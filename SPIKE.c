@@ -56,20 +56,28 @@ void initialise( void )
     
                  //                     F_CPU   Prescale   Timer frequency (1 ms)
     //OCR2A = 231; // Set compare value ((8000000Hz / 1024) / 1000Hz) * 33  // 30fps
-    // TODO: Need to time interrupt duration and tweak this number
-    // TODO: for now just fudge it a bit
-    OCR2A = 210; // ~3 ms to push out the screen data, probably actually faster than that though.
+    // draw screen takes ~4ms. 33-4 = 29
+    OCR2A = 226; // Set compare value ((8000000Hz / 1024) / 1000Hz) * 29  // ~30fps
+    
+    /* Configure Harware SPI */
+    //UBRR0 = (F_CPU / (2*BAUD)) - 1;
+    UBRR0 = 0;
+    //UCSR0C = (1<<UMSEL01) | (1<<UMSEL00) | (0<<UCSZ01) | (0<<UCSZ00) | (0<<UCPOL0);
+    UCSR0C = 0b11000000;
+    UCSR0B = (0<<RXEN0) | (1<<TXEN0);
     
     sei();                  // Enable interrupts
     
     /* Setup Display */
     initialise_oled();
     
+    front_buffer = &buffer1[0];
+    buffer = &buffer2[0];
+    
+    clear_display();
     // Need to do this AFTER display initialisation otherwise
     // The interrupt will fire and write garbage into command registers!
     TIMSK2 = 0x02;          // Enable OCR2A Interrupt
-    
-    clear_display();
 }
 
 ISR(TIMER0_COMPA_vect)
@@ -81,8 +89,15 @@ ISR(TIMER2_COMPA_vect)
 {
     for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
     {
-        shift_out_byte(buffer[i]);
+        shift_out_byte(front_buffer[i]);
     }
+}
+
+void flip()
+{
+    f = front_buffer;
+    front_buffer = buffer;
+    buffer = f;
 }
 
 word millis( void )
@@ -94,6 +109,14 @@ word millis( void )
 
 // TODO: this should use HW SPI (pins configured for USART SPI)
 void shift_out_byte(byte b)
+{
+    
+    while( !( UCSR0A & (1<<UDRE0) ) );
+    UDR0 = b;
+    //while( !( UCSR0A & (1<<TXC0) ) );
+}
+
+/*void shift_out_byte(byte b)
 {
     if ( b & (1 << 7) )
     {
@@ -190,7 +213,7 @@ void shift_out_byte(byte b)
     
     PORTB |= 1 << SCK;      // HIGH
     PORTB &= ~(1 << SCK);   // LOW
-}
+}*/
 
 /* Initiasation for SSD1306 OLED Controller */
 void initialise_oled(void)
@@ -257,6 +280,7 @@ void clear_display(void)
 {
     for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
     {
+        front_buffer[i] = 0x00;
         buffer[i] = 0x00;
     }
 }
