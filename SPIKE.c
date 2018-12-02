@@ -63,7 +63,7 @@ void initialise( void )
     //UBRR0 = (F_CPU / (2*BAUD)) - 1;
     UBRR0 = 0;
     //UCSR0C = (1<<UMSEL01) | (1<<UMSEL00) | (0<<UCSZ01) | (0<<UCSZ00) | (0<<UCPOL0);
-    UCSR0C = 0b11000000;
+    UCSR0C = 0b11000011;
     UCSR0B = (0<<RXEN0) | (1<<TXEN0);
     
     sei();                  // Enable interrupts
@@ -74,10 +74,12 @@ void initialise( void )
     front_buffer = &buffer1[0];
     buffer = &buffer2[0];
     
-    clear_display();
+    //clear_display();
     // Need to do this AFTER display initialisation otherwise
     // The interrupt will fire and write garbage into command registers!
     TIMSK2 = 0x02;          // Enable OCR2A Interrupt
+    
+    PORTB &= ~(1 << CS);                // LOW (Enabled)
 }
 
 ISR(TIMER0_COMPA_vect)
@@ -273,6 +275,7 @@ void initialise_oled(void)
     shift_out_byte(0 & 0x0F);           // Column start address (0 = reset)
     shift_out_byte(0x10 | (0 >> 4));    // LOW COL ADDR
     
+    PORTB |= 1 << CS;                   // HIGH (Disabled)
     PORTB |= 1 << DC;                   // DATA
 }
 
