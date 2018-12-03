@@ -62,10 +62,10 @@ void draw_sprite(sprite *s)
     }
 }
 
-byte check_collision(sprite *s, map *m)
+byte check_collision(sprite *s, const __memx map *m)
 {
-    word col = (sprite.x + 4) >> 3;
-    word row = (sprite.y + 8) >> 3;
+    word col = (s->x + 4) >> 3;
+    word row = (s->y + 8) >> 3;
     
     if (m->tiles[row*m->cols+col] > 0)
         return TRUE;
