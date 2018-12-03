@@ -13,7 +13,7 @@ sprite player = {
     .glyph=2
 };
 
-void draw_map(const map __memx *map, word x, word y)
+void draw_map(const map __memx *m, word x, word y)
 {
     // TODO: Need to allow x & y to cross block boundaries
     x >>= 3;
@@ -23,14 +23,14 @@ void draw_map(const map __memx *map, word x, word y)
     {
         for (byte col=0 ; col<SCREEN_COLUMNS ; col++)
         {
-            buffer[(row*SCREEN_WIDTH)+col*8+0] = GLYPHS[map->tiles[ map->cols * (row+y) + (col+x) ]*8 + 0];
-            buffer[(row*SCREEN_WIDTH)+col*8+1] = GLYPHS[map->tiles[ map->cols * (row+y) + (col+x) ]*8 + 1];
-            buffer[(row*SCREEN_WIDTH)+col*8+2] = GLYPHS[map->tiles[ map->cols * (row+y) + (col+x) ]*8 + 2];
-            buffer[(row*SCREEN_WIDTH)+col*8+3] = GLYPHS[map->tiles[ map->cols * (row+y) + (col+x) ]*8 + 3];
-            buffer[(row*SCREEN_WIDTH)+col*8+4] = GLYPHS[map->tiles[ map->cols * (row+y) + (col+x) ]*8 + 4];
-            buffer[(row*SCREEN_WIDTH)+col*8+5] = GLYPHS[map->tiles[ map->cols * (row+y) + (col+x) ]*8 + 5];
-            buffer[(row*SCREEN_WIDTH)+col*8+6] = GLYPHS[map->tiles[ map->cols * (row+y) + (col+x) ]*8 + 6];
-            buffer[(row*SCREEN_WIDTH)+col*8+7] = GLYPHS[map->tiles[ map->cols * (row+y) + (col+x) ]*8 + 7];
+            buffer[(row*SCREEN_WIDTH)+col*8+0] = GLYPHS[m->tiles[ m->cols * (row+y) + (col+x) ]*8 + 0];
+            buffer[(row*SCREEN_WIDTH)+col*8+1] = GLYPHS[m->tiles[ m->cols * (row+y) + (col+x) ]*8 + 1];
+            buffer[(row*SCREEN_WIDTH)+col*8+2] = GLYPHS[m->tiles[ m->cols * (row+y) + (col+x) ]*8 + 2];
+            buffer[(row*SCREEN_WIDTH)+col*8+3] = GLYPHS[m->tiles[ m->cols * (row+y) + (col+x) ]*8 + 3];
+            buffer[(row*SCREEN_WIDTH)+col*8+4] = GLYPHS[m->tiles[ m->cols * (row+y) + (col+x) ]*8 + 4];
+            buffer[(row*SCREEN_WIDTH)+col*8+5] = GLYPHS[m->tiles[ m->cols * (row+y) + (col+x) ]*8 + 5];
+            buffer[(row*SCREEN_WIDTH)+col*8+6] = GLYPHS[m->tiles[ m->cols * (row+y) + (col+x) ]*8 + 6];
+            buffer[(row*SCREEN_WIDTH)+col*8+7] = GLYPHS[m->tiles[ m->cols * (row+y) + (col+x) ]*8 + 7];
         }
     }
 }
