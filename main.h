@@ -12,7 +12,13 @@ typedef struct map {
 typedef struct sprite {
     int x;
     int y;
-    word frame;
+    
+    int vx;
+    int vy;
+    
+    byte jumping;
+    
+    word glyph;
 } sprite;
 
 static const __flash byte GLYPHS[] = {
@@ -53,5 +59,7 @@ static const __flash map level_1 = {
 
 void draw_map(const map __memx *map, word x, word y);
 void draw_sprite(sprite *s);
+
+byte check_collision(sprite *s, map *m);
 
 #endif

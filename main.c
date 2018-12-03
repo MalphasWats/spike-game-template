@@ -2,11 +2,15 @@
 
 #include "main.h"
 
+#define GRAVITY 1
+
 word t = 0;
 
 sprite player = {
     .x=0, .y=0,
-    .frame=2
+    .vx=2, .vy=0,
+    .jumping=FALSE,
+    .glyph=2
 };
 
 void draw_map(const map __memx *map, word x, word y)
@@ -33,30 +37,39 @@ void draw_map(const map __memx *map, word x, word y)
 
 void draw_sprite(sprite *s)
 {
-    //word col = s->x >> 3;
     word row = s->y >> 3;
     byte y_offset = s->y & 7; // s->y % 8
     
-    buffer[(row*SCREEN_WIDTH + s->x)+0] |= GLYPHS[s->frame*8+0] << y_offset;
-    buffer[(row*SCREEN_WIDTH + s->x)+1] |= GLYPHS[s->frame*8+1] << y_offset;
-    buffer[(row*SCREEN_WIDTH + s->x)+2] |= GLYPHS[s->frame*8+2] << y_offset;
-    buffer[(row*SCREEN_WIDTH + s->x)+3] |= GLYPHS[s->frame*8+3] << y_offset;
-    buffer[(row*SCREEN_WIDTH + s->x)+4] |= GLYPHS[s->frame*8+4] << y_offset;
-    buffer[(row*SCREEN_WIDTH + s->x)+5] |= GLYPHS[s->frame*8+5] << y_offset;
-    buffer[(row*SCREEN_WIDTH + s->x)+6] |= GLYPHS[s->frame*8+6] << y_offset;
-    buffer[(row*SCREEN_WIDTH + s->x)+7] |= GLYPHS[s->frame*8+7] << y_offset;
+    buffer[(row*SCREEN_WIDTH + s->x)+0] |= GLYPHS[s->glyph*8+0] << y_offset;
+    buffer[(row*SCREEN_WIDTH + s->x)+1] |= GLYPHS[s->glyph*8+1] << y_offset;
+    buffer[(row*SCREEN_WIDTH + s->x)+2] |= GLYPHS[s->glyph*8+2] << y_offset;
+    buffer[(row*SCREEN_WIDTH + s->x)+3] |= GLYPHS[s->glyph*8+3] << y_offset;
+    buffer[(row*SCREEN_WIDTH + s->x)+4] |= GLYPHS[s->glyph*8+4] << y_offset;
+    buffer[(row*SCREEN_WIDTH + s->x)+5] |= GLYPHS[s->glyph*8+5] << y_offset;
+    buffer[(row*SCREEN_WIDTH + s->x)+6] |= GLYPHS[s->glyph*8+6] << y_offset;
+    buffer[(row*SCREEN_WIDTH + s->x)+7] |= GLYPHS[s->glyph*8+7] << y_offset;
     
     if (y_offset > 0)
     {
-        buffer[((row+1)*SCREEN_WIDTH + s->x)+0] |= GLYPHS[s->frame*8+0] >> (8-y_offset);
-        buffer[((row+1)*SCREEN_WIDTH + s->x)+1] |= GLYPHS[s->frame*8+1] >> (8-y_offset);
-        buffer[((row+1)*SCREEN_WIDTH + s->x)+2] |= GLYPHS[s->frame*8+2] >> (8-y_offset);
-        buffer[((row+1)*SCREEN_WIDTH + s->x)+3] |= GLYPHS[s->frame*8+3] >> (8-y_offset);
-        buffer[((row+1)*SCREEN_WIDTH + s->x)+4] |= GLYPHS[s->frame*8+4] >> (8-y_offset);
-        buffer[((row+1)*SCREEN_WIDTH + s->x)+5] |= GLYPHS[s->frame*8+5] >> (8-y_offset);
-        buffer[((row+1)*SCREEN_WIDTH + s->x)+6] |= GLYPHS[s->frame*8+6] >> (8-y_offset);
-        buffer[((row+1)*SCREEN_WIDTH + s->x)+7] |= GLYPHS[s->frame*8+7] >> (8-y_offset);
+        buffer[((row+1)*SCREEN_WIDTH + s->x)+0] |= GLYPHS[s->glyph*8+0] >> (8-y_offset);
+        buffer[((row+1)*SCREEN_WIDTH + s->x)+1] |= GLYPHS[s->glyph*8+1] >> (8-y_offset);
+        buffer[((row+1)*SCREEN_WIDTH + s->x)+2] |= GLYPHS[s->glyph*8+2] >> (8-y_offset);
+        buffer[((row+1)*SCREEN_WIDTH + s->x)+3] |= GLYPHS[s->glyph*8+3] >> (8-y_offset);
+        buffer[((row+1)*SCREEN_WIDTH + s->x)+4] |= GLYPHS[s->glyph*8+4] >> (8-y_offset);
+        buffer[((row+1)*SCREEN_WIDTH + s->x)+5] |= GLYPHS[s->glyph*8+5] >> (8-y_offset);
+        buffer[((row+1)*SCREEN_WIDTH + s->x)+6] |= GLYPHS[s->glyph*8+6] >> (8-y_offset);
+        buffer[((row+1)*SCREEN_WIDTH + s->x)+7] |= GLYPHS[s->glyph*8+7] >> (8-y_offset);
     }
+}
+
+byte check_collision(sprite *s, map *m)
+{
+    word col = (sprite.x + 4) >> 3;
+    word row = (sprite.y + 8) >> 3;
+    
+    if (m->tiles[row*m->cols+col] > 0)
+        return TRUE;
+    return FALSE;
 }
 
 int main (void) 
@@ -80,9 +93,9 @@ int main (void)
     
     /* Debugging */
     byte delta = 0;
-    sprite d0 = {.x=8*3, .y=0, .frame=6};
-    sprite d1 = {.x=8*2, .y=0, .frame=6};
-    sprite d2 = {.x=8*1, .y=0, .frame=6};
+    sprite d0 = {.x=8*3, .y=0, .glyph=6};
+    sprite d1 = {.x=8*2, .y=0, .glyph=6};
+    sprite d2 = {.x=8*1, .y=0, .glyph=6};
     
     for(ever)
     {
@@ -91,19 +104,30 @@ int main (void)
         buttons = ~PINC;
         if (buttons & B_LEFT)
         {
-            player.x -= 1;
+            player.x -= player.vx;
+            if (check_collision(&player, &level_1))
+                player.x += player.vx;
         }
         if (buttons & B_RIGHT)
         {
-            player.x += 1;
+            player.x += player.vx;
+            if (check_collision(&player, &level_1))
+                player.x -= player.vx;
         }
-        if (buttons & B_UP)
+        
+        if ( (buttons & B_A) && !player.jumping )
         {
-            player.y -= 1;
+            player.vy = -7;
+            player.jumping = TRUE;
         }
-        if (buttons & B_DOWN)
+        player.vy += GRAVITY;
+        
+        player.y += player.vy;
+        if (check_collision(&player, &level_1))
         {
-            player.y += 1;
+            player.y -= player.vy;
+            player.vy = 0;
+            player.jumping = FALSE;
         }
         
         if (player.x < 0)
@@ -128,10 +152,10 @@ int main (void)
         
         /* Debugging */
         delta = (millis() - t);
-        d0.frame = (delta % 10) + 6;
+        d0.glyph = (delta % 10) + 6;
         delta /= 10;
-        d1.frame = (delta % 10) + 6;
+        d1.glyph = (delta % 10) + 6;
         delta /= 10;
-        d2.frame = (delta % 10) + 6;
+        d2.glyph = (delta % 10) + 6;
     }
 }
