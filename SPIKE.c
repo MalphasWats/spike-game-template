@@ -63,6 +63,7 @@ void initialise( void )
        USCZ01 = UDORD0 = 0 (MSBFIRST)
        UCSZ00 = UCPHA0 = 0 (SPI MODE 0)
        UCPOL0 =          0 (SPI MODE 0) */
+    UBRR0 = 0; // MAXIMUM BAUD RATE
     UCSR0C = (1<<UMSEL01) | (1<<UMSEL00) | (0<<UCSZ01) | (0<<UCSZ00) | (0<<UCPOL0);
     UCSR0B = (0<<RXEN0) | (1<<TXEN0);
     
