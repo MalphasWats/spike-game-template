@@ -59,13 +59,14 @@ void initialise( void )
     // draw screen takes ~4ms. 33-4 = 29
     OCR2A = 226; // Set compare value ((8000000Hz / 1024) / 1000Hz) * 29  // ~30fps
     
-    /* Configure Harware SPI */
-    UBRR0 = 0; // MAXIMUM BAUD RATE
-    // USCZ01 = UDORD0 = 0 (MSBFIRST)
-    // UCSZ00 = UCPHA0 = 0 (SPI MODE 0)
-    // UCPOL0 =          0 (SPI MODE 0)
+    /* Configure Harware SPI
+       USCZ01 = UDORD0 = 0 (MSBFIRST)
+       UCSZ00 = UCPHA0 = 0 (SPI MODE 0)
+       UCPOL0 =          0 (SPI MODE 0) */
     UCSR0C = (1<<UMSEL01) | (1<<UMSEL00) | (0<<UCSZ01) | (0<<UCSZ00) | (0<<UCPOL0);
     UCSR0B = (0<<RXEN0) | (1<<TXEN0);
+    
+    UBRR0 = 0; // MAXIMUM BAUD RATE
     
     sei();                  // Enable interrupts
     
