@@ -60,10 +60,11 @@ void initialise( void )
     OCR2A = 226; // Set compare value ((8000000Hz / 1024) / 1000Hz) * 29  // ~30fps
     
     /* Configure Harware SPI */
-    //UBRR0 = (F_CPU / (2*BAUD)) - 1;
-    UBRR0 = 0;
-    //UCSR0C = (1<<UMSEL01) | (1<<UMSEL00) | (0<<UCSZ01) | (0<<UCSZ00) | (0<<UCPOL0);
-    UCSR0C = 0b11000011;
+    UBRR0 = 0; // MAXIMUM BAUD RATE
+    // USCZ01 = UDORD0 = 0 (MSBFIRST)
+    // UCSZ00 = UCPHA0 = 0 (SPI MODE 0)
+    // UCPOL0 =          0 (SPI MODE 0)
+    UCSR0C = (1<<UMSEL01) | (1<<UMSEL00) | (0<<UCSZ01) | (0<<UCSZ00) | (0<<UCPOL0);
     UCSR0B = (0<<RXEN0) | (1<<TXEN0);
     
     sei();                  // Enable interrupts
@@ -108,114 +109,12 @@ word millis( void )
 }
 
 /* OLED Functions */
-
-// TODO: this should use HW SPI (pins configured for USART SPI)
 void shift_out_byte(byte b)
 {
     
     while( !( UCSR0A & (1<<UDRE0) ) );
     UDR0 = b;
-    //while( !( UCSR0A & (1<<TXC0) ) );
 }
-
-/*void shift_out_byte(byte b)
-{
-    if ( b & (1 << 7) )
-    {
-        PORTD |= 1 << MOSI;
-    }
-    else
-    {
-        PORTD &= ~(1 << MOSI);
-    }
-    
-    PORTB |= 1 << SCK;      // HIGH
-    PORTB &= ~(1 << SCK);   // LOW
-    
-    if ( b & (1 << 6) )
-    {
-        PORTD |= 1 << MOSI;
-    }
-    else
-    {
-        PORTD &= ~(1 << MOSI);
-    }
-    
-    PORTB |= 1 << SCK;      // HIGH
-    PORTB &= ~(1 << SCK);   // LOW
-    
-    if ( b & (1 << 5) )
-    {
-        PORTD |= 1 << MOSI;
-    }
-    else
-    {
-        PORTD &= ~(1 << MOSI);
-    }
-    
-    PORTB |= 1 << SCK;      // HIGH
-    PORTB &= ~(1 << SCK);   // LOW
-    
-    if ( b & (1 << 4) )
-    {
-        PORTD |= 1 << MOSI;
-    }
-    else
-    {
-        PORTD &= ~(1 << MOSI);
-    }
-    
-    PORTB |= 1 << SCK;      // HIGH
-    PORTB &= ~(1 << SCK);   // LOW
-    
-    if ( b & (1 << 3) )
-    {
-        PORTD |= 1 << MOSI;
-    }
-    else
-    {
-        PORTD &= ~(1 << MOSI);
-    }
-    
-    PORTB |= 1 << SCK;      // HIGH
-    PORTB &= ~(1 << SCK);   // LOW
-    
-    if ( b & (1 << 2) )
-    {
-        PORTD |= 1 << MOSI;
-    }
-    else
-    {
-        PORTD &= ~(1 << MOSI);
-    }
-    
-    PORTB |= 1 << SCK;      // HIGH
-    PORTB &= ~(1 << SCK);   // LOW
-    
-    if ( b & (1 << 1) )
-    {
-        PORTD |= 1 << MOSI;
-    }
-    else
-    {
-        PORTD &= ~(1 << MOSI);
-    }
-    
-    PORTB |= 1 << SCK;      // HIGH
-    PORTB &= ~(1 << SCK);   // LOW
-    
-    if ( b & (1 << 0) )
-    {
-        PORTD |= 1 << MOSI;
-    }
-    else
-    {
-        PORTD &= ~(1 << MOSI);
-    }
-    
-    PORTB |= 1 << SCK;      // HIGH
-    PORTB &= ~(1 << SCK);   // LOW
-}*/
 
 /* Initiasation for SSD1306 OLED Controller */
 void initialise_oled(void)

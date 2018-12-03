@@ -68,19 +68,18 @@ int main (void)
         for(byte x=0 ; x<LOGO_WIDTH ; x++)
             buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO[y*LOGO_WIDTH + x];
     flip();
-    //beep(_A4, 60);
-    //delay_ms(30);
-    //beep(_C5, 45), 
-    //delay_ms(20);
-    //beep(_E5, 30);
+    beep(_A4, 60);
+    delay_ms(30);
+    beep(_C5, 45), 
+    delay_ms(20);
+    beep(_E5, 30);
     
     delay_ms(SPLASH_DELAY);
     
     byte buttons = 0;
-    //byte cnt = 100;
+    
+    /* Debugging */
     byte delta = 0;
-    //word timer = 0;
-    //byte tmp = 0;
     sprite d0 = {.x=8*3, .y=0, .frame=6};
     sprite d1 = {.x=8*2, .y=0, .frame=6};
     sprite d2 = {.x=8*1, .y=0, .frame=6};
@@ -127,29 +126,12 @@ int main (void)
         
         flip();
         
-        //timer = millis();
-        
-        //for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
-        //{
-        //    shift_out_byte(buffer[i]);
-        //}
-        
-        //cnt += 1;
-        //if (cnt == 100)
-        //{
-            
-            delta = (millis() - t);///100;
-            //timer = millis();
-            
-            //cnt = 0;
-            
-            d0.frame = (delta % 10) + 6;
-            delta /= 10;
-            d1.frame = (delta % 10) + 6;
-            delta /= 10;
-            d2.frame = (delta % 10) + 6;
-        //}
-            
-        
+        /* Debugging */
+        delta = (millis() - t);
+        d0.frame = (delta % 10) + 6;
+        delta /= 10;
+        d1.frame = (delta % 10) + 6;
+        delta /= 10;
+        d2.frame = (delta % 10) + 6;
     }
 }
