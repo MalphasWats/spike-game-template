@@ -57,9 +57,9 @@ static const __flash map level_1 = {
 };
 
 
-void draw_map(const map __memx *map, word x, word y);
+void draw_map(const map __memx *m, word x, word y);
 void draw_sprite(sprite *s);
 
-byte check_collision(sprite *s, const __memx map *m);
+byte check_collision(sprite *s, const map __memx *m);
 
 #endif
