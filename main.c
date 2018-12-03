@@ -70,7 +70,7 @@ int main (void)
     flip();
     beep(_A4, 60);
     delay_ms(30);
-    beep(_C5, 45), 
+    beep(_C5, 45);
     delay_ms(20);
     beep(_E5, 30);
     
