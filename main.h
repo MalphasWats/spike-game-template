@@ -56,7 +56,7 @@ static const __flash map level_1 = {
     }
 };
 
-
+void draw_block(const byte __memx *glyph, int x, int y);
 void draw_map(const map __memx *m, word x, word y);
 void draw_sprite(sprite *s);
 
