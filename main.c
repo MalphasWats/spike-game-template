@@ -49,8 +49,9 @@ void draw_sprite(sprite *s)
 
 void draw_block(const byte __memx *glyph, int x, int y)
 {
-    word block_start = ((y >> 3) * SCREEN_WIDTH) + x;
-    byte y_offset = y & 7; // y % 8
+    int block_start = ((y >> 3) * SCREEN_WIDTH) + x;
+    byte y_offset_a = y & 7; // y % 8
+    byte y_offset_b = 8-y_offset_a;
     
     byte glyph_index = 0;
     byte block_width = 8;
@@ -66,11 +67,24 @@ void draw_block(const byte __memx *glyph, int x, int y)
         block_width = 8-(128-x);
     }
     
+    if (y < 0)
+    {
+        y_offset_a = 8;
+        y_offset_b = 0-y;
+        block_start -= SCREEN_WIDTH;
+    }
+    
+    if (y > 56)
+    {
+        offset_b = 8;
+    }
+    
     for(byte block_offset=0 ; block_offset<block_width ; block_offset++, glyph_index++)
     {
-        buffer[block_start+block_offset] |= glyph[glyph_index] << y_offset;
-        if (y_offset > 0)
-            buffer[block_start+SCREEN_WIDTH+block_offset] |= glyph[glyph_index] >> (8-y_offset);
+        if (y_offset_a < 8)
+            buffer[block_start+block_offset] |= glyph[glyph_index] << y_offset_a;
+        if (y_offset_b < 8)
+            buffer[block_start+SCREEN_WIDTH+block_offset] |= glyph[glyph_index] >> y_offset_b;
     }
 }
 
