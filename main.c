@@ -76,7 +76,7 @@ void draw_block(const byte __memx *glyph, int x, int y)
     
     if (y > 56)
     {
-        offset_b = 8;
+        y_offset_b = 8;
     }
     
     for(byte block_offset=0 ; block_offset<block_width ; block_offset++, glyph_index++)
