@@ -8,21 +8,17 @@ word t = 0;
 
 sprite player = {
     .x=0, .y=0,
-    .vx=2, .vy=0,
+    .vx=1, .vy=0,
     .jumping=FALSE,
     .glyph=2
 };
 
 void draw_map(const map __memx *m, word x, word y)
 {
-    // TODO: Need to allow x & y to cross block boundaries
-    
-    
-    
-    byte x_offset = x & 7;
+    byte x_offset = x & 7; // x % 8
     x >>= 3;
     
-    byte y_offset = y & 7;
+    byte y_offset = y & 7; // y % 8
     y >>= 3;
     
     byte NUM_ROWS = SCREEN_ROWS;
@@ -44,12 +40,18 @@ void draw_map(const map __memx *m, word x, word y)
 
 void draw_sprite(sprite *s)
 {
-    draw_block(&GLYPHS[s->glyph], s->x, s->y);
+    draw_block(&GLYPHS[s->glyph*8], s->x, s->y);
 }
 
 void draw_block(const byte __memx *glyph, int x, int y)
 {
-    int block_start = ((y >> 3) * SCREEN_WIDTH) + x;
+    int y_ = y;
+    
+    if (y < 0)
+        y_ = 0-y;
+        
+    int block_start = ((y_ >> 3) * SCREEN_WIDTH) + x;
+    
     byte y_offset_a = y & 7; // y % 8
     byte y_offset_b = 8-y_offset_a;
     
@@ -57,14 +59,14 @@ void draw_block(const byte __memx *glyph, int x, int y)
     byte block_width = 8;
     if (x < 0)
     {
-        block_start = 0;
+        block_start -= x;
         glyph_index = 0-x;
         block_width -= glyph_index;
     }
     
     if (x > 120)
     {
-        block_width = 8-(128-x);
+        block_width = 128-x;
     }
     
     if (y < 0)
@@ -90,6 +92,7 @@ void draw_block(const byte __memx *glyph, int x, int y)
 
 byte check_collision(sprite *s, const __memx map *m)
 {
+    // TODO: Doesn't work if map drawn offset
     word col = (s->x + 4) >> 3;
     word row = (s->y + 8) >> 3;
     
@@ -106,7 +109,7 @@ int main (void)
     for(byte y=0 ; y<LOGO_HEIGHT ; y++)
         for(byte x=0 ; x<LOGO_WIDTH ; x++)
             buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO[y*LOGO_WIDTH + x];
-    flip();
+    draw();
     beep(_A4, 60);
     delay_ms(30);
     beep(_C5, 45);
@@ -119,6 +122,7 @@ int main (void)
     
     /* Debugging */
     byte delta = 0;
+    byte count = 0;
     sprite d0 = {.x=8*3, .y=0, .glyph=6};
     sprite d1 = {.x=8*2, .y=0, .glyph=6};
     sprite d2 = {.x=8*1, .y=0, .glyph=6};
@@ -165,6 +169,8 @@ int main (void)
             player.y = 0;
         if (player.y > 64-8)
             player.y = 64-8;
+            
+        clear_buffer();
         
         draw_map(&level_1, 0, 0);
         
@@ -174,14 +180,19 @@ int main (void)
         draw_sprite(&d1);
         draw_sprite(&d2);
         
-        flip();
+        draw();
         
         /* Debugging */
         delta = (millis() - t);
-        d0.glyph = (delta % 10) + 6;
-        delta /= 10;
-        d1.glyph = (delta % 10) + 6;
-        delta /= 10;
-        d2.glyph = (delta % 10) + 6;
+        if (count == 0)
+        {
+            d0.glyph = (delta % 10) + 6;
+            delta /= 10;
+            d1.glyph = (delta % 10) + 6;
+            delta /= 10;
+            d2.glyph = (delta % 10) + 6;
+            count = 12;
+        }
+        count -= 1;
     }
 }
