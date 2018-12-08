@@ -1,7 +1,7 @@
 #ifndef SPIKE_H
 # define SPIKE_H
 
-#define F_CPU 8000000
+#define F_CPU 16000000
 
 #define ever ;;
 

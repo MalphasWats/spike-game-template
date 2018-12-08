@@ -5,18 +5,19 @@
 
 DEVICE     = atmega1284p
 DEVDUDE    = m1284p
-CLOCK      = 8000000
+#CLOCK      = 16000000
 PROGRAMMER = -c linuxspi -P /dev/spidev0.0
 OBJECTS    = SPIKE.o main.o     # Add more objects for each .c file here
 C_FLAGS    = -Wl,--gc-sections -Wl,--relax -ffunction-sections -fdata-sections -fno-inline-small-functions -fpack-struct -fshort-enums -mshort-calls
 # fuse settings:
 # use http://www.engbedded.com/fusecalc
 #FUSES      = -U lfuse:w:0x42:m -U hfuse:w:0x99:m -U efuse:w:0xff:m  # 1mhz
-FUSES      = -U lfuse:w:0xc2:m -U hfuse:w:0xd9:m -U efuse:w:0xff:m  # 8mhz
+#FUSES      = -U lfuse:w:0xc2:m -U hfuse:w:0xd9:m -U efuse:w:0xff:m  # 8mhz
+FUSES      = -U lfuse:w:0xfe:m -U hfuse:w:0xd9:m -U efuse:w:0xff:m  # 16mhz
 
-AVRDUDE = sudo avrdude -b 14400 $(PROGRAMMER) -p $(DEVDUDE)
-AVRDUDE_FAST = sudo avrdude -b 200000 $(PROGRAMMER) -p $(DEVDUDE)
-COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) $(C_FLAGS)
+AVRDUDE = sudo avrdude -b 200000 $(PROGRAMMER) -p $(DEVDUDE)
+AVRDUDE_FAST = sudo avrdude -b 1000000 $(PROGRAMMER) -p $(DEVDUDE)
+COMPILE = avr-gcc -Wall -O2 -mmcu=$(DEVICE) $(C_FLAGS)
 
 # symbolic targets:
 all:	main.hex
