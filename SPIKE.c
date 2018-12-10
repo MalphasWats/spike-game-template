@@ -77,12 +77,6 @@ ISR(TIMER0_COMPA_vect)
     _millis += 1;
 }
 
-void draw( void )
-{
-    for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
-        shift_out_byte(buffer[i]);
-}
-
 word millis( void )
 {
     return _millis;
@@ -161,6 +155,12 @@ void clear_buffer(void)
 {
     for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
         buffer[i] = 0x00;
+}
+
+void draw( void )
+{
+    for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
+        shift_out_byte(buffer[i]);
 }
 
 void display_off(void)
