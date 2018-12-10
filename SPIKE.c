@@ -56,12 +56,12 @@ void initialise( void )
     OCR1A = 2273; // TEST TONE - should be A ~ 440Hz 
 
     
-    TCCR2A = 0b00000000;
-    TCCR2B = 0b00000000;
+    TCCR3A = 0b00000000;
+    TCCR3B = 0b00001101;    // CTC Mode, 1/1024 prescale
     
-    TIMSK2 = 0x00;
+    TIMSK3 = 0x02;
     
-    OCR2A = 0;
+    OCR3A = 15625;    // 1 sec
     
     
     /* Configure Harware SPI
@@ -87,6 +87,12 @@ void initialise( void )
 ISR(TIMER0_COMPA_vect)
 {
     _millis += 1;
+}
+
+ISR(TIMER3_COMPA_vect)
+{
+    OCR1A = 0; // Stop tone
+    TIMSK3 = 0x00; // Disable interrupt
 }
 
 word millis( void )
