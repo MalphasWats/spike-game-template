@@ -132,20 +132,20 @@ int main (void)
         t = millis();
         
         buttons = ~PINC;
-        if (buttons & B_LEFT)
+        if (buttons & _LEFT)
         {
             player.x -= player.vx;
             if (check_collision(&player, &level_1))
                 player.x += player.vx;
         }
-        if (buttons & B_RIGHT)
+        if (buttons & _RIGHT)
         {
             player.x += player.vx;
             if (check_collision(&player, &level_1))
                 player.x -= player.vx;
         }
         
-        if ( (buttons & B_A) && !player.jumping )
+        if ( (buttons & _A) && !player.jumping )
         {
             player.vy = -7;
             player.jumping = TRUE;

@@ -33,13 +33,13 @@
 #define BTN_C       0
 
 /* Button Masks */
-#define B_UP        0b01000000
-#define B_DOWN      0b00100000
-#define B_LEFT      0b00010000
-#define B_RIGHT     0b00001000
-#define B_A         0b00000100
-#define B_B         0b00000010
-#define B_C         0b00000001
+#define _UP        0b01000000
+#define _DOWN      0b00100000
+#define _LEFT      0b00010000
+#define _RIGHT     0b00001000
+#define _A         0b00000100
+#define _B         0b00000010
+#define _C         0b00000001
 
 #define BTN_DELAY       180
 
