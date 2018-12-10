@@ -49,6 +49,20 @@ void initialise( void )
     
     TIMSK0 |= 0x02;         // Enable OCR0A Compare Interrupt
     
+    /* Configure sound timers */
+    TCCR1A = 0b01000001;    // phase correct pwm mode
+    TCCR1B = 0b00010010;    // 1/8 Prescale
+    
+    OCR1A = 2273; // TEST TONE - should be A ~ 440Hz 
+
+    
+    TCCR2A = 0b00000000;
+    TCCR2B = 0b00000000;
+    
+    TIMSK2 = 0x00;
+    
+    OCR2A = 0;
+    
     
     /* Configure Harware SPI
        USCZ01 = UDORD0 = 0 (MSBFIRST)
