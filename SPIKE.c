@@ -6,8 +6,6 @@
 
 volatile word _millis = 0;
 
-byte buffer[SCREEN_WIDTH * SCREEN_ROWS];
-
 word rngSEED = 5;
 word rng( void )
 {
