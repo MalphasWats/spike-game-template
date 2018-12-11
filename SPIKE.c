@@ -91,8 +91,10 @@ ISR(TIMER0_COMPA_vect)
 ISR(TIMER3_COMPA_vect)
 {
     //TODO: Needs to manage a queue
-    OCR1A = 0; // Stop note
-    TIMSK3 = 0x00; // Disable interrupt
+    OCR1A = 0;      // Stop note
+    TIMSK3 = 0x00;  // Disable interrupt
+    TCNT1 = 0;      // Reset PWM timer
+    TCNT3 = 0;      // Reset duration timer
 }
 
 void note(word note, word duration)
