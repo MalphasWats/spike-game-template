@@ -99,7 +99,7 @@ void note(word note, word duration)
 {
     //TODO: Needs to manage a queue
     OCR1A = note;
-    OCR3A = duration * 15;
+    OCR3A = duration * NOTE_DURATION_MULTIPLIER;
     
     TIMSK3 = 0x02;
 }
