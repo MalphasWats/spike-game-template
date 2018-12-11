@@ -110,11 +110,12 @@ int main (void)
         for(byte x=0 ; x<LOGO_WIDTH ; x++)
             buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO[y*LOGO_WIDTH + x];
     draw();
-    note(_A4, 60);
-    delay_ms(30+60);
-    note(_C5, 45);
-    delay_ms(20+45);
-    note(_E5, 30);
+    
+    note(_A4, 90);
+    delay_ms(180);
+    note(_C5, 60);
+    delay_ms(120);
+    note(_E5, 60);
     
     delay_ms(SPLASH_DELAY);
     
@@ -149,6 +150,7 @@ int main (void)
         {
             player.vy = -7;
             player.jumping = TRUE;
+            note(_A9, 8);
         }
         player.vy += GRAVITY;
         

@@ -2,7 +2,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-//#include <util/delay.h>
+#include <util/delay.h>
 
 volatile word _millis = 0;
 
@@ -15,9 +15,11 @@ word rng( void )
 
 void delay_ms( word ms )
 {
+    for(word i=0 ; i<ms ; i++)
+        _delay_ms(1);
     //TODO: This doesn't deal with overflow of _millis
-    ms += _millis;
-    while(ms > _millis);
+    //ms += _millis;
+    //while(ms > _millis);
 }
 
 /*void delay_us( word us )
@@ -58,7 +60,7 @@ void initialise( void )
     TCCR3A = 0b00000000;
     TCCR3B = 0b00001101;    // CTC Mode, 1/1024 prescale
     
-    TIMSK3 = 0x00;
+    TIMSK3 = 0x02;
     
     OCR3A = 0;
     
@@ -91,19 +93,17 @@ ISR(TIMER0_COMPA_vect)
 ISR(TIMER3_COMPA_vect)
 {
     //TODO: Needs to manage a queue
-    OCR1A = 0;      // Stop note
-    TIMSK3 = 0x00;  // Disable interrupt
-    TCNT1 = 0;      // Reset PWM timer
-    TCNT3 = 0;      // Reset duration timer
+    OCR3A = 0;
+    OCR1A = 0;
 }
 
 void note(word note, word duration)
 {
     //TODO: Needs to manage a queue
-    OCR1A = note;
-    OCR3A = duration * NOTE_DURATION_MULTIPLIER;
     
-    TIMSK3 = 0x02;
+    OCR1A = note;
+    TCNT3 = 0;
+    OCR3A = duration * NOTE_DURATION_MULTIPLIER;
 }
 
 word millis( void )
