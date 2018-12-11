@@ -2,7 +2,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
+//#include <util/delay.h>
 
 volatile word _millis = 0;
 
@@ -15,19 +15,18 @@ word rng( void )
 
 void delay_ms( word ms )
 {
-    for (word i=0; i < ms; i++)
-    {
-        _delay_ms(1);
-    }
+    //TODO: This doesn't deal with overflow of _millis
+    ms += _millis;
+    while(ms > _millis);
 }
 
-void delay_us( word us )
+/*void delay_us( word us )
 {
     for (word i=0; i < us; i++)
     {
         _delay_us(1);
     }
-}
+}*/
 
 void initialise( void )
 {
@@ -53,15 +52,15 @@ void initialise( void )
     TCCR1A = 0b01000001;    // phase correct pwm mode
     TCCR1B = 0b00010010;    // 1/8 Prescale
     
-    OCR1A = 2273; // TEST TONE - should be A ~ 440Hz 
+    OCR1A = 0;
 
     
     TCCR3A = 0b00000000;
     TCCR3B = 0b00001101;    // CTC Mode, 1/1024 prescale
     
-    TIMSK3 = 0x02;
+    TIMSK3 = 0x00;
     
-    OCR3A = 15625;    // 1 sec
+    OCR3A = 0;
     
     
     /* Configure Harware SPI
@@ -91,8 +90,18 @@ ISR(TIMER0_COMPA_vect)
 
 ISR(TIMER3_COMPA_vect)
 {
-    OCR1A = 0; // Stop tone
+    //TODO: Needs to manage a queue
+    OCR1A = 0; // Stop note
     TIMSK3 = 0x00; // Disable interrupt
+}
+
+void note(word note, word duration)
+{
+    //TODO: Needs to manage a queue
+    OCR1A = note;
+    OCR3A = duration * 15;
+    
+    TIMSK3 = 0x02;
 }
 
 word millis( void )
@@ -199,8 +208,9 @@ void display_on(void)
 
 /* Sound Functions */
 
-void beep(word note, word dur)
+/*void beep(word note, word dur)
 {
+    
     word ts = millis() + dur;
     while (millis() < ts)
     {
@@ -214,4 +224,4 @@ void beep(word note, word dur)
 void click( void )
 {
     beep(_A9, 15);
-}
+}*/

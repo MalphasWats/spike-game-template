@@ -110,11 +110,11 @@ int main (void)
         for(byte x=0 ; x<LOGO_WIDTH ; x++)
             buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO[y*LOGO_WIDTH + x];
     draw();
-    beep(_A4, 60);
-    delay_ms(30);
-    beep(_C5, 45);
-    delay_ms(20);
-    beep(_E5, 30);
+    note(_A4, 60);
+    delay_ms(30+60);
+    note(_C5, 45);
+    delay_ms(20+45);
+    note(_E5, 30);
     
     delay_ms(SPLASH_DELAY);
     
