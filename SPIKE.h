@@ -41,7 +41,7 @@
 #define _B         0b00000010
 #define _C         0b00000001
 
-#define BTN_DELAY       180
+#define BTN_DELAY       60
 
 #define SPLASH_DELAY    1500
 
@@ -50,6 +50,9 @@
 
 #define SCREEN_WIDTH    128
 #define SCREEN_HEIGHT   64
+
+#define HALF_SCREEN_WIDTH   128/2
+#define HALF_SCREEN_HEIGHT  64/2
 
 #define SCREEN_COLUMNS  16
 #define SCREEN_ROWS     8
@@ -78,6 +81,13 @@
 
 typedef unsigned char byte;
 typedef unsigned int word;
+typedef unsigned long dword;
+typedef unsigned char bool;
+
+typedef struct Viewport {
+    int x;
+    int y;
+} Viewport;
 
 byte buffer[SCREEN_WIDTH * SCREEN_ROWS];
 
@@ -90,30 +100,30 @@ static const __flash byte LOGO[] = {
 #define LOGO_WIDTH 96
 #define LOGO_HEIGHT 24/8
 
-#define rngM 7919
-#define rngA 17
+#define rngM 251
+#define rngA 11
 #define rngC 3
-word rng( void );
+byte rng( void );
 
 void delay_ms( word ms );
-//void delay_us( word us );
 
 // http://www.oz4.us/2015/12/recoding-bare-millis-clock-on-avr.html
 // https://github.com/sourceperl/millis/blob/master/millis.c
 // https://www.avrfreaks.net/forum/tut-c-newbies-guide-avr-timers?page=all
 void initialise( void );
-word millis( void );
+dword millis( void );
 
 /* OLED Function */
 void shift_out_byte(byte val);
 
 void initialise_oled(void);
 void clear_buffer(void);
+
 void draw(void);
 void display_off(void);
 void display_on(void);
 
 void note(word note, word dur);
-//void click( void );
+void click( void );
 
 #endif

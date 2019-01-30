@@ -2,12 +2,12 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
+//#include <util/delay.h>
 
-volatile word _millis = 0;
+volatile dword _millis = 0;
 
-word rngSEED = 5;
-word rng( void )
+byte rngSEED = 5;
+byte rng( void )
 {
     rngSEED = (rngSEED*rngA +rngC) % rngM;
     return rngSEED;
@@ -15,20 +15,15 @@ word rng( void )
 
 void delay_ms( word ms )
 {
-    for(word i=0 ; i<ms ; i++)
-        _delay_ms(1);
-    //TODO: This doesn't deal with overflow of _millis
-    //ms += _millis;
-    //while(ms > _millis);
-}
-
-/*void delay_us( word us )
-{
-    for (word i=0; i < us; i++)
+    ms += _millis;
+    if (ms<_millis)
     {
-        _delay_us(1);
+        while(_millis > 0);
+        while(_millis < ms);
     }
-}*/
+    else
+        while(_millis < ms);
+}
 
 void initialise( void )
 {
@@ -106,7 +101,7 @@ void note(word note, word duration)
     OCR3A = duration * NOTE_DURATION_MULTIPLIER;
 }
 
-word millis( void )
+dword millis( void )
 {
     return _millis;
 }
@@ -210,20 +205,7 @@ void display_on(void)
 
 /* Sound Functions */
 
-/*void beep(word note, word dur)
-{
-    
-    word ts = millis() + dur;
-    while (millis() < ts)
-    {
-        PORTD |= 1 << SND;      // HIGH
-        delay_us(note);
-        PORTD &= ~(1 << SND);   // LOW
-        delay_us(note);
-    }
-}
-
 void click( void )
 {
-    beep(_A9, 15);
-}*/
+    note(_A9, 15);
+}
