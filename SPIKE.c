@@ -127,13 +127,24 @@ void note(word note, word duration)
 
 void play_tune(const __memx Tune *t)
 {
-    current_note = 0;
-    current_tune = t;
-    byte note_index = current_tune->score[current_note] & 0x0f;
-    byte beat_index = current_tune->score[current_note] >> 4;
-    current_note += 1;
-    note(NOTES[note_index], BEATS[beat_index]*BEAT_ATOM);
-    playing = TRUE;
+    if (!playing)
+    {
+        current_note = 0;
+        current_tune = t;
+        playing = TRUE;
+        TCNT3 = 0;
+        OCR3A = 1;
+    }
+}
+
+void stop_tune()
+{
+    if (playing)
+    {
+        OCR3A = 0;
+        OCR1A = 0;
+        playing = FALSE;
+    }
 }
 
 dword millis( void )

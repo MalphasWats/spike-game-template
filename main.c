@@ -152,6 +152,13 @@ int main (void)
             player.jumping = TRUE;
             note(_A9, 8);
         }
+        
+        if ( buttons & _B )
+            play_tune(&STARTUP_CHIME);
+        
+        if ( buttons & _C )
+            stop_tune();
+        
         player.vy += GRAVITY;
         
         player.y += player.vy;

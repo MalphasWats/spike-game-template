@@ -103,6 +103,7 @@ static const __flash word NOTES[16] = {
     1073,
 };
 
+#define nRST 0
 #define nA4  1
 #define nC5  4
 #define nE5  8
@@ -118,11 +119,12 @@ static const __flash byte BEATS[8] = {
     1,      // HEMI DEMI SEMI QUAVER
 };
 
-#define QUAVER 4 << 4
-#define DMINIM 2 << 4
+#define SEMIBREVE   0 << 4
+#define QUAVER      4 << 4
+#define DMINIM      2 << 4
 
 // Starting at 128 BPM
-#define BEAT_ATOM 8 * NOTE_DURATION_MULTIPLIER   // 8 Milliseconds
+#define BEAT_ATOM 8 * 4 * NOTE_DURATION_MULTIPLIER   // 8 Milliseconds
 
 typedef struct Tune {
     word length;
@@ -135,6 +137,7 @@ static const __flash Tune STARTUP_CHIME = {
         QUAVER | nA4,       QUAVER | nC5,       DMINIM | nE5,
     },
 };
+
 
 byte buffer[SCREEN_WIDTH * SCREEN_ROWS];
 
@@ -174,5 +177,6 @@ void note(word note, word dur);
 void click( void );
 
 void play_tune(const __memx Tune *t);
+void stop_tune();
 
 #endif
