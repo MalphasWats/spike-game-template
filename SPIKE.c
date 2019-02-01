@@ -6,6 +6,10 @@
 
 volatile dword _millis = 0;
 
+const __memx Tune *current_tune;
+byte current_note;
+bool playing = FALSE;
+
 byte rngSEED = 5;
 byte rng( void )
 {
@@ -72,6 +76,8 @@ void initialise( void )
     
     sei();                  // Enable interrupts
     
+    play_tune(&STARTUP_CHIME);
+    
     /* Setup Display */
     initialise_oled();
     
@@ -87,18 +93,47 @@ ISR(TIMER0_COMPA_vect)
 
 ISR(TIMER3_COMPA_vect)
 {
-    //TODO: Needs to manage a queue
+    if (playing)
+    {
+        if (current_note < current_tune->length)
+        {
+            byte note_index = current_tune->score[current_note] & 0x0f;
+            byte beat_index = current_tune->score[current_note] >> 4;
+            OCR1A = NOTES[note_index];
+            TCNT3 = 0;
+            OCR3A = BEATS[beat_index] * BEAT_ATOM;
+            current_note += 1;
+            return;
+        }
+        else
+        {
+            playing = FALSE;
+        }
+    }
+    
     OCR3A = 0;
     OCR1A = 0;
 }
 
 void note(word note, word duration)
 {
-    //TODO: Needs to manage a queue
-    
-    OCR1A = note;
-    TCNT3 = 0;
-    OCR3A = duration * NOTE_DURATION_MULTIPLIER;
+    if (!playing)
+    {
+        OCR1A = note;
+        TCNT3 = 0;
+        OCR3A = duration * NOTE_DURATION_MULTIPLIER;
+    }
+}
+
+void play_tune(const __memx Tune *t)
+{
+    current_note = 0;
+    current_tune = t;
+    byte note_index = current_tune->score[current_note] & 0x0f;
+    byte beat_index = current_tune->score[current_note] >> 4;
+    current_note += 1;
+    note(NOTES[note_index], BEATS[beat_index]*BEAT_ATOM);
+    playing = TRUE;
 }
 
 dword millis( void )

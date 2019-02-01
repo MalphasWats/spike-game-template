@@ -111,11 +111,11 @@ int main (void)
             buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO[y*LOGO_WIDTH + x];
     draw();
     
-    note(_A4, 90);
+    /*note(_A4, 90);
     delay_ms(180);
     note(_C5, 60);
     delay_ms(120);
-    note(_E5, 60);
+    note(_E5, 60);*/
     
     delay_ms(SPLASH_DELAY);
     

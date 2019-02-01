@@ -74,8 +74,9 @@
 #define _A5      1250 // 800,     A(5)          C
 #define _Bb5     1073 // 932,     Bb(5)         D
 #define _B5      1012 // 988,     B(5)          E
-#define _A8      142  // 7040,    A8            F
-#define _A9      71   // 14080    A9            X
+
+#define _A8      142  // 7040,    A8            
+#define _A9      71   // 14080    A9            
 
 #define NOTE_DURATION_MULTIPLIER 15    // 1ms
 
@@ -84,10 +85,56 @@ typedef unsigned int word;
 typedef unsigned long dword;
 typedef unsigned char bool;
 
-typedef struct Viewport {
-    int x;
-    int y;
-} Viewport;
+static const __flash word NOTES[16] = {
+    0,
+    2273,
+    2146,
+    2024,
+    1912,
+    1805,
+    1703,
+    1608,
+    1518,
+    1433,
+    1351,
+    1337,
+    1203,
+    1250,
+    1073,
+};
+
+#define nA4  1
+#define nC5  4
+#define nE5  8
+
+static const __flash byte BEATS[8] = {
+    64,     // SEMIBREVE
+    48,     // DOTTED MINIM
+    32,     // MINIM
+    16,     // CROTCHET
+    8,      // QUAVER
+    4,      // SEMI QUAVER
+    2,      // DEMI SEMI QUAVER
+    1,      // HEMI DEMI SEMI QUAVER
+};
+
+#define QUAVER 4 << 4
+#define DMINIM 2 << 4
+
+// Starting at 128 BPM
+#define BEAT_ATOM 8 * NOTE_DURATION_MULTIPLIER   // 8 Milliseconds
+
+typedef struct Tune {
+    word length;
+    byte score[];
+} Tune;
+
+static const __flash Tune STARTUP_CHIME = {
+    .length = 3,
+    .score = {
+        QUAVER | nA4,       QUAVER | nC5,       DMINIM | nE5,
+    },
+};
 
 byte buffer[SCREEN_WIDTH * SCREEN_ROWS];
 
@@ -125,5 +172,7 @@ void display_on(void);
 
 void note(word note, word dur);
 void click( void );
+
+void play_tune(const __memx Tune *t);
 
 #endif
