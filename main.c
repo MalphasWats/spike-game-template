@@ -133,6 +133,15 @@ int main (void)
         t = millis();
         
         buttons = ~PINC;
+        if (buttons & _UP)
+        {
+            note(_A5, 15);
+        }
+        if (buttons & _DOWN)
+        {
+            note(_B4, 15);
+        }
+        
         if (buttons & _LEFT)
         {
             player.x -= player.vx;
