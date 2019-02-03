@@ -17,7 +17,7 @@ FUSES      = -U lfuse:w:0xfe:m -U hfuse:w:0xd9:m -U efuse:w:0xff:m  # 16mhz
 
 AVRDUDE = sudo avrdude -b 200000 $(PROGRAMMER) -p $(DEVDUDE)
 AVRDUDE_FAST = sudo avrdude -b 1000000 $(PROGRAMMER) -p $(DEVDUDE)
-COMPILE = avr-gcc -Wall -O2 -mmcu=$(DEVICE) $(C_FLAGS)
+COMPILE = avr-gcc -Wall -O3 -mmcu=$(DEVICE) $(C_FLAGS)
 
 # symbolic targets:
 all:	main.hex

@@ -2,7 +2,6 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-//#include <util/delay.h>
 
 volatile dword _millis = 0;
 
@@ -50,6 +49,7 @@ void initialise( void )
     TIMSK0 |= 0x02;         // Enable OCR0A Compare Interrupt
     
     /* Configure sound timers */
+    //TODO: Use Proper bit names
     TCCR1A = 0b01000001;    // phase correct pwm mode
     TCCR1B = 0b00010010;    // 1/8 Prescale
     
@@ -81,9 +81,13 @@ void initialise( void )
     /* Setup Display */
     initialise_oled();
     
-    clear_buffer();
+    for(byte y=0 ; y<(LOGO.height>>3) ; y++)
+        for(byte x=0 ; x<LOGO.width ; x++)
+            buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO.data[y*LOGO.width + x];
     
-    PORTB &= ~(1 << CS);                // LOW (Enabled)
+    draw();
+    
+    delay_ms(SPLASH_DELAY);
 }
 
 ISR(TIMER0_COMPA_vect)
@@ -115,11 +119,11 @@ ISR(TIMER3_COMPA_vect)
     OCR1A = 0;
 }
 
-void note(word note, word duration)
+void note(byte note, word duration)
 {
     if (!playing)
     {
-        OCR1A = note;
+        OCR1A = NOTES[note];
         TCNT3 = 0;
         OCR3A = duration * NOTE_DURATION_MULTIPLIER;
     }
@@ -219,6 +223,8 @@ void initialise_oled(void)
     
     PORTB |= 1 << CS;                   // HIGH (Disabled)
     PORTB |= 1 << DC;                   // DATA
+    delay_ms(1);
+    PORTB &= ~(1 << CS);                // LOW (Enabled)
 }
 
 void clear_buffer(void)
@@ -253,5 +259,5 @@ void display_on(void)
 
 void click( void )
 {
-    note(_A9, 15);
+    note(_C5, 15);
 }
